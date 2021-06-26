@@ -14,10 +14,18 @@ apt install jq -y
 
 **Usage**
 ```
+# cat > .token
+<SHODAN_PREMIUM_API>
+
 # bash karma.sh target.tld
 
 Output will be saved in output/target.tld-YYY-MM-DD directory
 ```
+
+Some example usage:
+
+```shell
+# bash karma.sh target.tld
 
 ##### Requirements
 - shodan python module [ pip3 install shodan ]
