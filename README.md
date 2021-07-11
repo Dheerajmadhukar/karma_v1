@@ -4,7 +4,9 @@
 **KARMA_v1**
 is a simple bash script automation that can talk to [Shodan](https://shodan.io) Premium API and find active IPs, ASN, Common Vulnerabilities, CVEs &amp; Open Ports. 
 
-**This VERSION (karma_v1) limit to 1000 IPs/Results only***
+**This VERSION (karma_v1) limit to 1000 IPs/Results only**
+
+***Its (karma_v1) a bit slow due to shodan API rate limit.***
 
 #### Installation
 
