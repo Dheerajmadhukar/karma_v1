@@ -16,10 +16,6 @@ git clone https://github.com/Dheerajmadhukar/karma.git
 pip3 install shodan
 apt install jq -y
 ````
-<h1 align="left">
-  <img src="karma_v1.png" alt="Dheerajmadhukar" width="700px"></a>
-  <br>
-</h1>
 
 **Usage**
 ```
@@ -30,6 +26,10 @@ apt install jq -y
 
 Output will be saved in output/target.tld-YYY-MM-DD directory
 ```
+<h1 align="left">
+  <img src="karma_v1.png" alt="Dheerajmadhukar" width="700px"></a>
+  <br>
+</h1>
 
 Some example usage:
 
