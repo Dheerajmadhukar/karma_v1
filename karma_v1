@@ -21,9 +21,9 @@ cd IP_VULNS;cat ../main.data|awk -F":" '{print $1}'|while read -r line;do shodan
 echo -e "\n"
 gunzip *.gz 2> /dev/null
 ls -1 | while read -r line; do
-printf "[$right] IP:$end $green $(cat $line | jq -r ".ip_str" | sort -u)$end\n"
-printf "[$right] ASN:$end $green $(cat $line | jq -r ".asn" | sort -u)$end\n"
-printf "[$right] Ports:$end $green $(cat $line | jq -r ".port" | sort -u)$end\n"
-printf "[$right] CVEs:$end $green $(cat $line | jq -r ".vulns | to_entries[] | .key" 2> /dev/null | sort -u)$end\n"
+printf "[$right] IP:$end $green $(zcat $line | jq -r ".ip_str" | sort -u)$end\n"
+printf "[$right] ASN:$end $green $(zcat $line | jq -r ".asn" | sort -u)$end\n"
+printf "[$right] Ports:$end $green $(zcat $line | jq -r ".port" | sort -u)$end\n"
+printf "[$right] CVEs:$end $green $(zcat $line | jq -r ".vulns | to_entries[] | .key" 2> /dev/null | sort -u)$end\n"
 echo "----------------------"
 done
