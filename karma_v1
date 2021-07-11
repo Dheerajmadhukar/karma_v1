@@ -17,7 +17,7 @@ mkdir IP_VULNS
 o=$(shodan download $target.json.gz ssl:"$target" 2> /dev/null|grep "Saved");printf ">> ${green}$o${end}\n"
 echo "--------------------------------"
 shodan parse --fields ip_str,asn,hostnames,port,product,org --separator ":" $target.json.gz > main.data
-cd IP_VULNS;cat ../main.data|awk -F":" '{print $1}'|while read -r line;do shodan host -S $line > /dev/null;sleep 5;echo -n ">>Hang On<<";done
+cd IP_VULNS;cat ../main.data|awk -F":" '{print $1}'|while read -r line;do shodan host -S $line 2> /dev/null;sleep 5;echo -n ">>Hang On<<";done
 echo -e "\n"
 ls -1 | while read -r line; do
 printf "[$right] IP:$end $green $(zcat $line | jq -r ".ip_str" | sort -u | sed -n '1h;2,$H;${g;s/\n/, /g;s/<----- key \(start\|stop\) ----->//g;p}')$end\n"
