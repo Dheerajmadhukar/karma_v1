@@ -14,16 +14,15 @@ rm -rf output/$folder > /dev/null
 mkdir -p output/$folder;cd output/$folder
 mkdir IP_VULNS
 
-shodan download $target.json.gz ssl:$target
+o=$(shodan download $target.json.gz ssl:"$target" 2> /dev/null|grep "Saved");printf ">> ${green}$o${end}\n"
 echo "--------------------------------"
-shodan parse --fields ip_str,port --separator ":" $target.json.gz > main.data
-cd IP_VULNS;cat ../main.data|awk -F":" '{print $1}'|while read -r line;do shodan host -S $line > /dev/null;sleep 5;echo -n ">>";done
+shodan parse --fields ip_str,asn,hostnames,port,product,org --separator ":" $target.json.gz > main.data
+cd IP_VULNS;cat ../main.data|awk -F":" '{print $1}'|while read -r line;do shodan host -S $line > /dev/null;sleep 5;echo -n ">>Hang On<<";done
 echo -e "\n"
-gunzip *.gz 2> /dev/null
 ls -1 | while read -r line; do
-printf "[$right] IP:$end $green $(zcat $line | jq -r ".ip_str" | sort -u)$end\n"
-printf "[$right] ASN:$end $green $(zcat $line | jq -r ".asn" | sort -u)$end\n"
-printf "[$right] Ports:$end $green $(zcat $line | jq -r ".port" | sort -u)$end\n"
-printf "[$right] CVEs:$end $green $(zcat $line | jq -r ".vulns | to_entries[] | .key" 2> /dev/null | sort -u)$end\n"
+printf "[$right] IP:$end $green $(zcat $line | jq -r ".ip_str" | sort -u | sed -n '1h;2,$H;${g;s/\n/, /g;s/<----- key \(start\|stop\) ----->//g;p}')$end\n"
+printf "[$right] ASN:$end $green $(zcat $line | jq -r ".asn" | sort -u | sed -n '1h;2,$H;${g;s/\n/, /g;s/<----- key \(start\|stop\) ----->//g;p}')$end\n"
+printf "[$right] Ports:$end $green $(zcat $line | jq -r ".port" | sort -u | sed -n '1h;2,$H;${g;s/\n/, /g;s/<----- key \(start\|stop\) ----->//g;p}')$end\n"
+printf "[$right] CVEs:$end $green $(zcat $line | jq -r ".vulns | to_entries[] | .key" 2> /dev/null | sort -u | sed -n '1h;2,$H;${g;s/\n/, /g;s/<----- key \(start\|stop\) ----->//g;p}')$end\n"
 echo "----------------------"
 done
