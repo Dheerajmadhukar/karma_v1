@@ -39,3 +39,4 @@ Some example usage:
 ##### Requirements
 - shodan python module [ pip3 install shodan ]
 - jq [ apt install jq -y ]
+- httpx [@pdiscoveryio](https://github.com/projectdiscovery/httpx)
