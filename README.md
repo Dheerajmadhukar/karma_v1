@@ -13,7 +13,7 @@ is a simple bash script automation that can talk to [Shodan](https://shodan.io) 
 * Verify each IP with SSL/TLS certificate issuer match RegEx
 * Find out all ports including well known/uncommon
 * Grab all targets vulnerabilities related to CVEs
-* Banner grab for each IPs' server as well as version of product.
+* Banner grab for each IP & Product
 
 
 ***Its (karma_v1) a bit slow due to shodan API rate limit.***
