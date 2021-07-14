@@ -7,23 +7,54 @@
  right=$(printf '\xE2\x9C\x94')
  end="\e[0m"
 
-api=$(cat .token)
-shodan init $api > /dev/null
-folder=$target-$(date '-I')
-rm -rf output/$folder > /dev/null
-mkdir -p output/$folder;cd output/$folder
+
+BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+shodan_bin="shodan"
+jq_bin="jq"
+interlace_bin="interlace"
+httpx_bin="httpx"
+sleep_time="5"
+api="${BASE_DIR}/.token"
+
+
+echo "${target}" | grep -E '^([a-zA-Z0-9](([a-zA-Z0-9-]){0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$' &> /dev/null
+if [[ "$?" -eq 0 ]];then
+##
+${shodan_bin} init ${api} &> /dev/null
+folder=${target}-$(date '-I')
+rm -rf output/${folder} > /dev/null
+mkdir -p output/${folder};cd output/${folder}
 mkdir IP_VULNS
 
-o=$(shodan download $target.json.gz ssl:"$target" 2> /dev/null|grep "Saved");printf ">> ${green}$o${end}\n"
+# shodan && httpx && interlace && jq
+"${shodan_bin}" --help > /dev/null 2>&1 || printf "\n[${red}!${end}] ${yellow}Error: Unable to find ${shodan_bin}. Make sure it installed OR \n\t - pip3 install shodan${end}\n;exit 1"
+"${httpx_bin}" --help > /dev/null 2>&1 || printf "\n[${red}!${end}] ${yellow}Error: Unable to find ${httpx_bin}. Make sure it installed OR \n\t - GO111MODULE=on go get -v github.com/projectdiscovery/httpx/cmd/httpx${end}\n;exit 1"
+"${interlace_bin}" --help > /dev/null 2>&1 || printf "\n[${red}!${end}] ${yellow}Error: Unable to find ${interlace_bin}. Make sure it installed OR \n\t - Clone https://github.com/codingo/Interlace.git${end}\n;exit 1"
+"${jq_bin}" --help > /dev/null 2>&1 || printf "\n[${red}!${end}] ${yellow}Error: Unable to find ${jq_bin}. Make sure it installed OR \n\t - apt install jq -y${end}\n;exit 1"
+
+o=$(${shodan_bin} download ${target}.json.gz ssl:"${target}" 2> /dev/null|grep "Saved");printf "${green}\n$o${end}\n"
 echo "--------------------------------"
-shodan parse --fields ip_str,asn,hostnames,port,product,org --separator ":" $target.json.gz > main.data
-cat main.data | cut -d":" -f1 | sort -u | httpx -threads 500 -silent | interlace -threads 100 -c "echo _target_; curl --insecure -v _target_ 2>&1 | awk 'BEGIN { cert=0 } /^\* SSL connection/ { cert=1 } /^\*/ { if (cert) print }'" --silent | egrep "https:\/\/|CN\=|issuer: " | grep -v "^[[:blank:]]*$" | grep -B 1 "\.$1$" | grep -Eo '(http|https)://[^/"]+' | tee alive_ips.txt
-cd IP_VULNS;cat ../main.data|awk -F":" '{print $1}'|while read -r line;do shodan host -S $line &> /dev/null;sleep 5;echo -n ">>Hang On<<";done
+${shodan_bin} parse --fields ip_str,asn,hostnames,port,product,org --separator "," ${target}.json.gz > main.data
+#printf "IPs:ASNs:Hostname:Ports:Products:Orgs\n" > /tmp/header.txt
+cat main.data | cut -d"," -f1 | sort -u | ${httpx_bin} -threads 500 -silent | ${interlace_bin} -threads 100 -c "echo _target_; curl --insecure -v _target_ 2>&1 | awk 'BEGIN { cert=0 } /^\* SSL connection/ { cert=1 } /^\*/ { if (cert) print }'" --silent | egrep "https:\/\/|CN\=|issuer: " | grep -v "^[[:blank:]]*$" | grep -B 1 "\.$1$" | grep -Eo '(http|https)://[^/"]+' | tee alive_ips.txt
+cd IP_VULNS;cat ../alive_ips.txt|grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b"|awk -F":" '{print $1}'|while read -r line;do ${shodan_bin} host -S $line &> /dev/null;sleep 5;echo -n ">>Hang On<<";done
 echo -e "\n"
-ls -1 | while read -r line; do
-printf "[$right] IP:$end $green $(zcat $line | jq -r ".ip_str" | sort -u | sed -n '1h;2,$H;${g;s/\n/, /g;s/<----- key \(start\|stop\) ----->//g;p}')$end\n"
-printf "[$right] ASN:$end $green $(zcat $line | jq -r ".asn" | sort -u | sed -n '1h;2,$H;${g;s/\n/, /g;s/<----- key \(start\|stop\) ----->//g;p}')$end\n"
-printf "[$right] Ports:$end $green $(zcat $line | jq -r ".port" | sort -u | sed -n '1h;2,$H;${g;s/\n/, /g;s/<----- key \(start\|stop\) ----->//g;p}')$end\n"
-printf "[$right] CVEs:$end $green $(zcat $line | jq -r ".vulns | to_entries[] | .key" 2> /dev/null | sort -u | sed -n '1h;2,$H;${g;s/\n/, /g;s/<----- key \(start\|stop\) ----->//g;p}')$end\n"
+ls -1 | while read -r x; do
+#IPs
+printf "[${right}] ${red}IP:${end} ${green}$(zcat $x | jq -r 'select(.ip_str != null)|.ip_str' | sort -u | sed -n '1h;2,$H;${g;s/\n/, /g;s/<----- key \(start\|stop\) ----->//g;p}')\n"${end}
+#Ports
+printf "[${right}] ${red}Ports:${end} ${green}$(zcat $x | jq -r 'select(.port != null)|.port' | sort -u | sed -n '1h;2,$H;${g;s/\n/, /g;s/<----- key \(start\|stop\) ----->//g;p}')\n"${end}
+#CVEs
+o=$(zcat $x | jq -r '.vulns | to_entries[] | select(.key != null) |.key' 2> /dev/null|sed -n '1h;2,$H;${g;s/\n/, /g;s/<----- key \(start\|stop\) ----->//g;p}');if [ -z "$o" ];then printf "[${right}] ${red}CVEs:${end} ${yellow}No results found\n"${end};else printf "[${right}] ${red}CVEs:${end} ${green}$o \n"${end};fi
+#Org
+printf "[${right}] ${red}Org:${end} ${green}$(zcat $x | jq -r 'select(.org != null)|.org' | sort -u | sed -n '1h;2,$H;${g;s/\n/, /g;s/<----- key \(start\|stop\) ----->//g;p}')\n"${end}
+#HTTP Server
+printf "[${right}] ${red}Servers:${end} ${green}$(zcat $x | jq -r '.http|select(.server != null)|.server' | sort -u | sed -n '1h;2,$H;${g;s/\n/, /g;s/<----- key \(start\|stop\) ----->//g;p}')\n"${end}
+#Products
+printf "[${right}] ${red}Products:${end} ${green}$(zcat $x | jq -r 'select(.product != null)|.product' | sort -u | sed -n '1h;2,$H;${g;s/\n/, /g;s/<----- key \(start\|stop\) ----->//g;p}')\n"${end}
 echo "----------------------"
 done
+##
+else
+        printf "[${red}!${end}] ${yellow}Domain ${target} seems down or invalid. Make sure its a valid one.${end}\n"
+fi
