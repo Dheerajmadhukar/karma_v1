@@ -46,7 +46,7 @@ Clone https://github.com/codingo/Interlace.git & install accordingly.
 
 ## Ok, how do I use it?
 ```bash
-$ cat > .token
+# cat > .token
 <SHODAN_PREMIUM_API_HERE>
 ```
 ```bash
