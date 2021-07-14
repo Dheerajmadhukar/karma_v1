@@ -11,7 +11,7 @@ is a simple bash script automation that can talk to [Shodan](https://shodan.io) 
 * Powerful and flexible results via Shodan Dorks
 * Only hit In-Scope IPs
 * Verify each IP with SSL/TLS certificate issuer match RegEx
-* Find out all ports includes well known/uncommon
+* Find out all ports including well known/uncommon
 * Grab all target vulnerabilities related to CVEs
 * Banner grab for each IPs' server as well as version of product.
 
