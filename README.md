@@ -39,7 +39,7 @@ is a simple bash script automation that can talk to [Shodan](https://shodan.io) 
 ```bash
 # GO111MODULE=on go get -v github.com/projectdiscovery/httpx/cmd/httpx
 ```
-### 5. Install Interlace [@codingo](https://github.com/codingo/Interlace.git) to multithread [ Follow the codingo interlace repo instructions. ]
+### 5. Install Interlace [@codingo](https://github.com/codingo/Interlace.git) to multithread [Follow the codingo interlace repo instructions]
 ```bash
 Clone https://github.com/codingo/Interlace.git & install accordingly. 
 ```
