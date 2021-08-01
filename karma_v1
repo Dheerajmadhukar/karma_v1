@@ -21,6 +21,7 @@ echo "${target}" | grep -E '^([a-zA-Z0-9](([a-zA-Z0-9-]){0,61}[a-zA-Z0-9])?\.)+[
 if [[ "$?" -eq 0 ]];then
 ##
 ${shodan_bin} init ${api} &> /dev/null
+BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 folder=${target}-$(date '-I')
 rm -rf output/${folder} > /dev/null
 mkdir -p output/${folder};cd output/${folder}
@@ -32,13 +33,13 @@ mkdir IP_VULNS
 "${interlace_bin}" --help > /dev/null 2>&1 || printf "\n[${red}!${end}] ${yellow}Error: Unable to find ${interlace_bin}. Make sure it installed OR \n\t - Clone https://github.com/codingo/Interlace.git${end}\n;exit 1"
 "${jq_bin}" --help > /dev/null 2>&1 || printf "\n[${red}!${end}] ${yellow}Error: Unable to find ${jq_bin}. Make sure it installed OR \n\t - apt install jq -y${end}\n;exit 1"
 
-o=$(${shodan_bin} download ssl_domain_${target}.json.gz ssl:"${target}" 2> /dev/null|grep "Saved");printf "${green}\n$o${end}\n"
-o=$(${shodan_bin} download ssl_issuer_${target}.json.gz ssl.cert.issuer.cn:"${target}" 2> /dev/null|grep "Saved");printf "${green}\n$o${end}\n"
-o=$(${shodan_bin} download org_domain_${target}.json.gz org:"${target}" 2> /dev/null|grep "Saved");printf "${green}\n$o${end}\n"
+o=$(${shodan_bin} download ${BASE_DIR}/output/${folder}/ssl_domain_${target}.json.gz ssl:"${target}" 2> /dev/null|grep "Saved");printf "${green}\n$o${end}\n"
+o=$(${shodan_bin} download ${BASE_DIR}/output/${folder}/ssl_issuer_${target}.json.gz ssl.cert.issuer.cn:"${target}" 2> /dev/null|grep "Saved");printf "${green}\n$o${end}\n"
+o=$(${shodan_bin} download ${BASE_DIR}/output/${folder}/org_domain_${target}.json.gz org:"${target}" 2> /dev/null|grep "Saved");printf "${green}\n$o${end}\n"
 echo "--------------------------------"
-${shodan_bin} parse --fields ip_str,asn,hostnames,port,product,org --separator "," ssl_domain_${target}.json.gz ssl_issuer${target}.json.gz org_domain_${target}.json.gz > main_${target}.data &> /dev/null
-if [[ -z "main_$target.data" ]];then
-cat main_${target}.data | cut -d"," -f1 | sort -u | ${httpx_bin} -threads 500 -silent | ${interlace_bin} -threads 100 -c "echo _target_; curl --insecure -v _target_ 2>&1 | awk 'BEGIN { cert=0 } /^\* SSL connection/ { cert=1 } /^\*/ { if (cert) print }'" --silent | egrep "https:\/\/|CN\=|issuer: " | grep -v "^[[:blank:]]*$" | grep -B 1 "\.$1$" | grep -Eo '(http|https)://[^/"]+' | tee alive_ips.txt 2&> /dev/null
+${shodan_bin} parse --fields ip_str,asn,hostnames,port,product,org --separator "," ${BASE_DIR}/output/${folder}/*.json.gz | anew -q ${BASE_DIR}/output/${folder}/main_${target}.data &> /dev/null
+if [[ -f "main_$target.data" ]];then
+cat main_${target}.data | cut -d"," -f1 | sort -u | ${httpx_bin} -threads 500 -silent | ${interlace_bin} -threads 100 -c "echo _target_; curl --insecure -v _target_ 2>&1 | awk 'BEGIN { cert=0 } /^\* SSL connection/ { cert=1 } /^\*/ { if (cert) print }'" --silent | egrep "https:\/\/|CN\=|issuer: " | grep -v "^[[:blank:]]*$" | grep -B 1 "${target}$" | grep -Eo '(http|https)://[^/"]+' | tee alive_ips.txt 2&> /dev/null
 else
         exit 1
 fi
