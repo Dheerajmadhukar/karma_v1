@@ -26,7 +26,7 @@ is a simple bash script automation that can talk to [Shodan](https://shodan.io) 
 ## Installation
 ### 1. Clone the repo
  ```bash
-# git clone https://github.com/Dheerajmadhukar/karma.git
+# git clone https://github.com/Dheerajmadhukar/karma_v1.git
 ```
 ### 2. Install shodan python module
 ```bash
