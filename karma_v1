@@ -29,9 +29,15 @@ mkdir IP_VULNS
 
 # shodan && httpx && interlace && jq
 "${shodan_bin}" --help > /dev/null 2>&1 || printf "\n[${red}!${end}] ${yellow}Error: Unable to find ${shodan_bin}. Make sure it installed OR \n\t - pip3 install shodan${end}\n;exit 1"
-#"${httpx_bin}" --help > /dev/null 2>&1 || printf "\n[${red}!${end}] ${yellow}Error: Unable to find ${httpx_bin}. Make sure it installed OR \n\t - GO111MODULE=on go get -v github.com/projectdiscovery/httpx/cmd/httpx${end}\n;exit 1"
+"${httpx_bin}" --help > /dev/null 2>&1 || printf "\n[${red}!${end}] ${yellow}Error: Unable to find ${httpx_bin}. Make sure it installed OR \n\t - GO111MODULE=on go get -v github.com/projectdiscovery/httpx/cmd/httpx${end}\n;exit 1"
 "${interlace_bin}" --help > /dev/null 2>&1 || printf "\n[${red}!${end}] ${yellow}Error: Unable to find ${interlace_bin}. Make sure it installed OR \n\t - Clone https://github.com/codingo/Interlace.git${end}\n;exit 1"
 "${jq_bin}" --help > /dev/null 2>&1 || printf "\n[${red}!${end}] ${yellow}Error: Unable to find ${jq_bin}. Make sure it installed OR \n\t - apt install jq -y${end}\n;exit 1"
+
+shodan stats --facets ssl.cert.fingerprint ssl:"${target}"|grep -Eo "[[:xdigit:]]{40}" | grep -v "^[[:blank:]]*$" | anew -q /tmp/fingerprints.txt
+
+o=$(cat /tmp/fingerprints.txt|while read -r line;do ${shodan_bin} download ${BASE_DIR}/output/${folder}/ssl_SHA1_${line}.json.gz ssl.cert.fingerprint:\"$line\" 2> /dev/null|grep "Saved";sleep 2;done);printf "${green}\n$o${end}\n"
+
+rm /tmp/fingerprints.txt > /dev/null
 
 o=$(${shodan_bin} download ${BASE_DIR}/output/${folder}/ssl_domain_${target}.json.gz ssl:"${target}" 2> /dev/null|grep "Saved");printf "${green}\n$o${end}\n"
 o=$(${shodan_bin} download ${BASE_DIR}/output/${folder}/ssl_issuer_${target}.json.gz ssl.cert.issuer.cn:"${target}" 2> /dev/null|grep "Saved");printf "${green}\n$o${end}\n"
@@ -39,7 +45,7 @@ o=$(${shodan_bin} download ${BASE_DIR}/output/${folder}/org_domain_${target}.jso
 echo "--------------------------------"
 ${shodan_bin} parse --fields ip_str,asn,hostnames,port,product,org --separator "," ${BASE_DIR}/output/${folder}/*.json.gz | anew -q ${BASE_DIR}/output/${folder}/main_${target}.data &> /dev/null
 if [[ -f "main_$target.data" ]];then
-cat main_${target}.data | cut -d"," -f1 | sort -u | ${httpx_bin} -threads 500 -silent | ${interlace_bin} -threads 100 -c "echo _target_; curl --insecure -v _target_ 2>&1 | awk 'BEGIN { cert=0 } /^\* SSL connection/ { cert=1 } /^\*/ { if (cert) print }'" --silent | egrep "https:\/\/|CN\=|issuer: " | grep -v "^[[:blank:]]*$" | grep -B 1 "${target}$" | grep -Eo '(http|https)://[^/"]+' | tee alive_ips.txt 2&> /dev/null
+cat main_${target}.data | cut -d"," -f1 | sort -u | ${httpx_bin} -threads 500 -silent | ${interlace_bin} -threads 100 -c "echo _target_; curl --insecure -v _target_ 2>&1 | awk 'BEGIN { cert=0 } /^\* SSL connection/ { cert=1 } /^\*/ { if (cert) print }'" --silent | egrep "https:\/\/|CN\=|issuer: " | grep -v "^[[:blank:]]*$" | grep -B 1 "${target}$" | grep -Eo '(http|https)://[^/"]+' | tee alive_ips.txt
 else
         exit 1
 fi
