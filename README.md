@@ -9,6 +9,7 @@ is a simple bash script automation that can talk to [Shodan](https://shodan.io) 
 ## What's special about this tool?
 
 * Powerful and flexible results via Shodan Dorks
+* SSL SHA1 checksum/fingerprint Search
 * Only hit In-Scope IPs
 * Verify each IP with SSL/TLS certificate issuer match RegEx
 * Find out all ports including well known/uncommon
@@ -67,6 +68,7 @@ Some example usage:
 ```
 ##### Requirements
 - shodan python module [ pip3 install shodan ]
+- anew [@tomnomnom](https://github.com/tomnomnom/anew)
 - jq [ apt install jq -y ]
 - httpx [@pdiscoveryio](https://github.com/projectdiscovery/httpx)
 - Interlace [@codingo](https://github.com/codingo/Interlace.git)
