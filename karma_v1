@@ -28,9 +28,9 @@ mkdir -p output/${folder};cd output/${folder}
 mkdir IP_VULNS
 
 # shodan && httpx && interlace && jq
-"${shodan_bin}" --help > /dev/null 2>&1 || printf "\n[${red}!${end}] ${yellow}Error: Unable to find ${shodan_bin}. Make sure it installed OR \n\t - pip3 install shodan${end}\n;exit 1"
-"${httpx_bin}" --help > /dev/null 2>&1 || printf "\n[${red}!${end}] ${yellow}Error: Unable to find ${httpx_bin}. Make sure it installed OR \n\t - GO111MODULE=on go get -v github.com/projectdiscovery/httpx/cmd/httpx${end}\n;exit 1"
-"${interlace_bin}" --help > /dev/null 2>&1 || printf "\n[${red}!${end}] ${yellow}Error: Unable to find ${interlace_bin}. Make sure it installed OR \n\t - Clone https://github.com/codingo/Interlace.git${end}\n;exit 1"
+"${shodan_bin}" --help > /dev/null 2>&1 || printf "\n[${red}!${end}] ${yellow}Error: Unable to find ${shodan_bin}. Make sure it installed OR \n\t - pip3 install shodan${end}\n";exit 1
+"${httpx_bin}" --help > /dev/null 2>&1 || printf "\n[${red}!${end}] ${yellow}Error: Unable to find ${httpx_bin}. Make sure it installed OR \n\t - GO111MODULE=on go get -v github.com/projectdiscovery/httpx/cmd/httpx${end}\n";exit 1
+"${interlace_bin}" --help > /dev/null 2>&1 || printf "\n[${red}!${end}] ${yellow}Error: Unable to find ${interlace_bin}. Make sure it installed OR \n\t - Clone https://github.com/codingo/Interlace.git${end}\n";exit 1
 "${jq_bin}" --help > /dev/null 2>&1 || printf "\n[${red}!${end}] ${yellow}Error: Unable to find ${jq_bin}. Make sure it installed OR \n\t - apt install jq -y${end}\n;exit 1"
 
 shodan stats --facets ssl.cert.fingerprint ssl:"${target}"|grep -Eo "[[:xdigit:]]{40}" | grep -v "^[[:blank:]]*$" | anew -q /tmp/fingerprints.txt
