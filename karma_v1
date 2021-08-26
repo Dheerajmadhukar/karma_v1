@@ -20,7 +20,7 @@ api="${BASE_DIR}/.token"
 echo "${target}" | grep -E '^([a-zA-Z0-9](([a-zA-Z0-9-]){0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$' &> /dev/null
 if [[ "$?" -eq 0 ]];then
 ##
-${shodan_bin} init ${api} &> /dev/null
+${shodan_bin} init `cat ${api}` &> /dev/null
 BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 folder=${target}-$(date '-I')
 rm -rf output/${folder} > /dev/null
