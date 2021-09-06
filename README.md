@@ -1,6 +1,10 @@
 <a href="https://www.buymeacoffee.com/medheeraj"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a beer&emoji=🍺&slug=medheeraj&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff"></a>
 
 ![Follow on Twitter](https://img.shields.io/twitter/follow/Dheerajmadhukar?style=social)
+
+## `Do check the latest one: KARMA_V2 (https://github.com/Dheerajmadhukar/karma_v2)`
+
+
 ## What is this?
 **KARMA_v1**
 is a simple bash script automation that can talk to [Shodan](https://shodan.io) Premium API and find active IPs, ASN, Common Vulnerabilities, CVEs &amp; Open Ports, Products, Hostname, Server Details. 
